@@ -1,16 +1,50 @@
-# This is a sample Python script.
+"""
+Simulare Evenimente Discrete — Cozi UPU
+Proiect de licenta
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+Compara diferite strategii de gestionare a cozilor de asteptare
+in Unitatile de Primiri Urgente (UPU).
+"""
+from experiments.config import SimulationConfig
+from experiments.runner import run_all_experiments
+from experiments.analysis import analyze_results
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def main():
+    print("=" * 60)
+    print("  SIMULARE UPU — Comparatie Strategii de Coada")
+    print("=" * 60)
+
+    # Configurare implicita
+    config = SimulationConfig(
+        num_doctors=3,
+        num_nurses=2,
+        arrival_rate=12.0,
+        simulation_duration=480.0,    # 8 ore
+        warmup_period=60.0,
+        num_replications=30,
+        random_seed=42,
+    )
+
+    print(f"\n  Parametri simulare:")
+    print(f"    Medici: {config.num_doctors}")
+    print(f"    Asistente: {config.num_nurses}")
+    print(f"    Rata sosire: {config.arrival_rate} pacienti/ora")
+    print(f"    Durata: {config.simulation_duration} min ({config.simulation_duration / 60:.0f} ore)")
+    print(f"    Warmup: {config.warmup_period} min")
+    print(f"    Replicari: {config.num_replications}")
+    print()
+
+    # Rulare experimente
+    print("  Rulare experimente...")
+    all_results = run_all_experiments(config)
+
+    # Analiza si grafice
+    print("\n  Analiza rezultate...")
+    summary = analyze_results(all_results, output_dir="results")
+
+    print("\n  GATA! Verifica folderul 'results/' pentru grafice si CSV-uri.")
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    main()
