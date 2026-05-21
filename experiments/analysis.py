@@ -13,19 +13,19 @@ from simulation.models import TriageLevel
 # Stil grafice
 sns.set_theme(style="whitegrid", palette="muted", font_scale=1.1)
 COLORS = {
-    "FIFO": "#636EFA",
-    "Priority Strict": "#EF553B",
-    "Priority + FIFO": "#00CC96",
-    "SJF (Shortest Job First)": "#AB63FA",
-    "Round Robin Ponderat": "#FFA15A",
+    "FIFO": "#5C768D",
+    "Priority Strict": "#A5525A",
+    "Priority + FIFO": "#558A7A",
+    "SJF (Shortest Job First)": "#7F6294",
+    "Round Robin Ponderat": "#C0865C",
 }
 
 LEVEL_COLORS = {
-    1: "#FF4444",   # Rosu
-    2: "#FFD700",   # Galben
-    3: "#44BB44",   # Verde
-    4: "#4488FF",   # Albastru
-    5: "#CCCCCC",   # Alb
+    1: "#C25953",   # Rosu
+    2: "#D4AC0D",   # Galben
+    3: "#52BE80",   # Verde
+    4: "#5DADE2",   # Albastru
+    5: "#BDC3C7",   # Alb
 }
 
 
