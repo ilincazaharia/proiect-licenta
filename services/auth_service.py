@@ -22,7 +22,7 @@ class AuthService:
         pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         return bool(re.match(pattern, email))
 
-    def register_user(self, nume: str, prenume: str, email: str, password: str, role: str = 'manager', specialty_id: Optional[int] = None) -> Tuple[bool, str]:
+    def register_user(self, nume: str, prenume: str, email: str, password: str, role: str = 'manager', specialty: Optional[str] = None) -> Tuple[bool, str]:
         """
         Înregistrează un utilizator nou cu validările necesare.
         Returnează (succes, mesaj).
@@ -54,7 +54,7 @@ class AuthService:
             prenume=prenume,
             email=email,
             role=role,
-            specialty_id=specialty_id
+            specialty=specialty
         )
 
         success = self.user_repo.create(new_user, pwd_hash, salt)

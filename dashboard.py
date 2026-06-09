@@ -4,10 +4,13 @@ from repositories.db_connection import DBConnection
 from services.auth_service import AuthService
 from services.doctor_service import DoctorService
 from services.simulation_service import SimulationService
+from services.patient_service import PatientService
+from services.referral_service import ReferralService
 from ui.auth_view import AuthView
 from ui.sidebar import SidebarView
 from ui.simulation_view import SimulationView
 from ui.doctor_view import DoctorView
+from ui.referral_view import ReferralView
 
 # Inițializare bază de date SQLite
 DBConnection.init_db()
@@ -16,6 +19,8 @@ DBConnection.init_db()
 auth_service = AuthService()
 doctor_service = DoctorService()
 simulation_service = SimulationService()
+patient_service = PatientService()
+referral_service = ReferralService()
 
 # Setare pagină
 st.set_page_config(page_title="Simulare UPU", layout="wide")
@@ -25,6 +30,25 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
+
+# Auto-login pe bază de query params dacă sesiunea a fost reîmprospătată
+if not st.session_state.logged_in and "user_id" in st.query_params:
+    try:
+        user_id = int(st.query_params["user_id"])
+        from repositories.user_repository import UserRepository
+        user = UserRepository().get_by_id(user_id)
+        if user:
+            st.session_state.logged_in = True
+            st.session_state.user_info = {
+                "id": user.id,
+                "email": user.email,
+                "nume": user.nume,
+                "prenume": user.prenume,
+                "role": user.role,
+                "specialty": user.specialty
+            }
+    except Exception as e:
+        pass
 
 # Inițializare session state pentru rezultate active
 if "current_results" not in st.session_state:
@@ -58,6 +82,7 @@ if "replications" not in st.session_state: st.session_state.replications = 30
 def logout():
     st.session_state.logged_in = False
     st.session_state.user_info = None
+    st.query_params.clear()
     st.rerun()
 
 # --- BLOC AUTENTIFICARE ---
@@ -103,40 +128,17 @@ else:
     if user_role == "medic_urgente":
         st.title("Dashboard Medic Urgențe")
         st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['prenume']} {st.session_state.user_info['nume']}")
-        st.info("Această secțiune este destinată medicului din Unitatea de Primiri Urgențe (UPU).")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### Pacienți în Triaj & Tratament")
-            st.write("Vizualizare pacienți activi în UPU. În etapa următoare a proiectului, aici veți putea decide trimiterea pacienților către secțiile de specialitate.")
-            st.dataframe(pd.DataFrame({
-                "Nume Pacient": ["Ionescu Maria", "Popescu Andrei", "Vasile Elena"],
-                "Nivel Triaj": ["Cod Roșu", "Cod Galben", "Cod Verde"],
-                "Stare": ["În tratament", "În așteptare", "Triat"]
-            }), use_container_width=True)
-            
-        with col2:
-            st.markdown("### Trimiteri active către Secții")
-            st.write("Urmăriți starea trimiterilor efectuate către medicii de pe secții.")
-            st.info("Nu există trimiteri active în acest moment.")
+        ReferralView.render_doctor_urgente(
+            user_info=st.session_state.user_info,
+            patient_service=patient_service,
+            referral_service=referral_service
+        )
             
     elif user_role == "medic_sectie":
         spec_name = st.session_state.user_info.get('specialty', 'Nespecificat')
         st.title(f"Dashboard Medic Secție: {spec_name}")
         st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['prenume']} {st.session_state.user_info['nume']}")
-        st.info(f"Această secțiune este destinată medicului de pe secția de specialitate **{spec_name}**.")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### Solicitări noi de internare / transfer")
-            st.write("Aici veți primi propunerile de transfer din UPU, având posibilitatea de a le **Accepta** sau **Respinge**.")
-            st.warning("Momentan nu aveți nicio solicitare nouă de transfer din UPU.")
-            
-        with col2:
-            st.markdown("### Pacienți Internați pe Secție")
-            st.write(f"Lista pacienților internați în prezent pe secția {spec_name}.")
-            st.dataframe(pd.DataFrame({
-                "Nume Pacient": ["Georgescu Dan", "Marinescu Ana"],
-                "Diagnostic": ["Tratament Observație", "Investigații Suplimentare"],
-                "Data Internării": ["2026-06-08", "2026-06-07"]
-            }), use_container_width=True)
+        ReferralView.render_doctor_sectie(
+            user_info=st.session_state.user_info,
+            referral_service=referral_service
+        )

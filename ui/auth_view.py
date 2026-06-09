@@ -32,8 +32,9 @@ class AuthView:
                                     "nume": user.nume,
                                     "prenume": user.prenume,
                                     "role": user.role,
-                                    "specialty": user.specialty_name
+                                    "specialty": user.specialty
                                 }
+                                st.query_params["user_id"] = str(user.id)
                                 st.rerun()
                             else:
                                 st.error("Adresa de email sau parola incorecta.")

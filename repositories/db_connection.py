@@ -11,24 +11,11 @@ class DBConnection:
 
     @classmethod
     def init_db(cls):
-        """Inițializează tabelele și efectuează migrările dacă este necesar."""
+        """Inițializează tabelele conform noii scheme OOP."""
         conn = cls.get_connection()
         cursor = conn.cursor()
         
-        # Tabela specializari/sectii
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS specialties (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE NOT NULL
-            )
-        """)
-        
-        # Inserare specializari implicite
-        default_specialties = ["Cardiologie", "Neurologie", "Pediatrie", "Chirurgie", "Terapie Intensivă", "Gastroenterologie"]
-        for spec in default_specialties:
-            cursor.execute("INSERT OR IGNORE INTO specialties (name) VALUES (?)", (spec,))
-
-        # Tabela utilizatori
+        # Tabela utilizatori (fără created_at sau specialty_id)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,10 +24,44 @@ class DBConnection:
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 salt TEXT NOT NULL,
-                role TEXT DEFAULT 'manager',
-                specialty_id INTEGER,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
+                role TEXT DEFAULT 'manager'
+            )
+        """)
+
+        # Tabela medici (asociază specializarea text la user)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS doctors (
+                user_id INTEGER PRIMARY KEY,
+                specialty TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+
+        # Tabela pacienți (fără created_at)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS patients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cnp TEXT UNIQUE NOT NULL,
+                nume TEXT NOT NULL,
+                prenume TEXT NOT NULL
+            )
+        """)
+
+        # Tabela trimiteri (fără created_at)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS referrals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                patient_id INTEGER NOT NULL,
+                triage_level TEXT NOT NULL,
+                specialty TEXT NOT NULL,
+                sender_id INTEGER NOT NULL,
+                receiver_id INTEGER,
+                status TEXT DEFAULT 'in_asteptare',
+                observatii TEXT,
+                response_notes TEXT,
+                FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+                FOREIGN KEY (sender_id) REFERENCES users(id),
+                FOREIGN KEY (receiver_id) REFERENCES users(id)
             )
         """)
         
@@ -67,17 +88,6 @@ class DBConnection:
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         """)
-        
-        # Migrare pentru a adăuga coloanele role și specialty_id dacă nu există deja
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'manager'")
-        except sqlite3.OperationalError:
-            pass # coloana exista deja
-            
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN specialty_id INTEGER")
-        except sqlite3.OperationalError:
-            pass # coloana exista deja
 
         conn.commit()
         conn.close()

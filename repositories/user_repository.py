@@ -15,19 +15,17 @@ class UserRepository:
             prenume=row[2],
             email=row[3],
             role=row[4],
-            specialty_id=row[5],
-            specialty_name=row[6],
-            created_at=row[7]
+            specialty=row[5]
         )
 
     def get_by_email(self, email: str) -> Optional[User]:
-        """Caută un utilizator după email."""
+        """Caută un utilizator după email (cu JOIN pe tabela doctors pentru specializare)."""
         conn = DBConnection.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT u.id, u.nume, u.prenume, u.email, u.role, u.specialty_id, s.name as specialty_name, u.created_at
+            SELECT u.id, u.nume, u.prenume, u.email, u.role, d.specialty
             FROM users u
-            LEFT JOIN specialties s ON u.specialty_id = s.id
+            LEFT JOIN doctors d ON u.id = d.user_id
             WHERE LOWER(u.email) = ?
         """, (email.lower().strip(),))
         row = cursor.fetchone()
@@ -42,9 +40,9 @@ class UserRepository:
         conn = DBConnection.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT u.id, u.nume, u.prenume, u.email, u.role, u.specialty_id, s.name as specialty_name, u.created_at
+            SELECT u.id, u.nume, u.prenume, u.email, u.role, d.specialty
             FROM users u
-            LEFT JOIN specialties s ON u.specialty_id = s.id
+            LEFT JOIN doctors d ON u.id = d.user_id
             WHERE u.id = ?
         """, (user_id,))
         row = cursor.fetchone()
@@ -64,22 +62,31 @@ class UserRepository:
         return row
 
     def create(self, user: User, password_hash: str, salt: str) -> bool:
-        """Creează un utilizator nou în baza de date."""
+        """Creează un utilizator nou și, dacă este medic, îi asociază specializarea în doctors."""
         try:
             conn = DBConnection.get_connection()
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO users (nume, prenume, email, password_hash, salt, role, specialty_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO users (nume, prenume, email, password_hash, salt, role)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 user.nume.strip(),
                 user.prenume.strip(),
                 user.email.lower().strip(),
                 password_hash,
                 salt,
-                user.role,
-                user.specialty_id
+                user.role
             ))
+            
+            user_id = cursor.lastrowid
+            
+            # Dacă rolul este de medic, inserăm și în tabela doctors
+            if user.role in ('medic_urgente', 'medic_sectie') and user.specialty:
+                cursor.execute("""
+                    INSERT INTO doctors (user_id, specialty)
+                    VALUES (?, ?)
+                """, (user_id, user.specialty))
+                
             conn.commit()
             conn.close()
             return True
@@ -88,15 +95,15 @@ class UserRepository:
             return False
 
     def get_all_doctors(self) -> List[User]:
-        """Returnează toți medicii (de urgențe sau de secție)."""
+        """Returnează toți medicii (cu specializarea extrasă din doctors)."""
         conn = DBConnection.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT u.id, u.nume, u.prenume, u.email, u.role, u.specialty_id, s.name as specialty_name, u.created_at
+            SELECT u.id, u.nume, u.prenume, u.email, u.role, d.specialty
             FROM users u
-            LEFT JOIN specialties s ON u.specialty_id = s.id
+            INNER JOIN doctors d ON u.id = d.user_id
             WHERE u.role IN ('medic_urgente', 'medic_sectie')
-            ORDER BY u.created_at DESC
+            ORDER BY u.id DESC
         """)
         rows = cursor.fetchall()
         conn.close()
@@ -104,7 +111,7 @@ class UserRepository:
         return [self._row_to_user(row) for row in rows]
 
     def delete_doctor(self, doctor_id: int) -> bool:
-        """Șterge un medic din baza de date."""
+        """Șterge un medic (cascade de pe users șterge și din doctors)."""
         try:
             conn = DBConnection.get_connection()
             cursor = conn.cursor()
