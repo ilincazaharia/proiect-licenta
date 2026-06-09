@@ -33,6 +33,11 @@ class SimulationConfig:
         5: (10, 3),
     })
 
+    # Ore de varf (Peak hours)
+    peak_multiplier: float = 2.0         # De cate ori creste rata la orele de varf
+    peak_start_min: float = 120.0        # Cand incepe varful (minutul)
+    peak_duration_min: float = 120.0     # Cat dureaza varful
+
     # Durata simularii (minute)
     simulation_duration: float = 480.0   # 8 ore = un schimb
     warmup_period: float = 60.0          # prima ora = warmup

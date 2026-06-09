@@ -53,6 +53,7 @@ def analyze_results(all_results: list[dict], output_dir: str = "results"):
     _plot_los_boxplot(df, output_dir)
     _plot_target_compliance(df, output_dir)
     _plot_waiting_time_heatmap(df, output_dir)
+    _plot_congestion(all_results, output_dir)
 
     print(f"\n  Grafice salvate in: {output_dir}/")
     return summary
@@ -203,3 +204,37 @@ def _plot_waiting_time_heatmap(df: pd.DataFrame, output_dir: str):
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "5_heatmap.png"), dpi=150)
     plt.close()
+
+
+def _plot_congestion(all_results: list[dict], output_dir: str):
+    """Grafic 6: Aglomerarea cozilor in timp (medie per strategie)."""
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Aggregating congestion logs: strategy -> time -> list of queue lengths
+    congestion_data = {}
+    for res in all_results:
+        strategy = res["strategy"]
+        if strategy not in congestion_data:
+            congestion_data[strategy] = {}
+        
+        for log in res.get("congestion_logs", []):
+            t = log["time"]
+            if t not in congestion_data[strategy]:
+                congestion_data[strategy][t] = []
+            congestion_data[strategy][t].append(log["doctors_queue"])
+
+    for strategy, time_data in congestion_data.items():
+        times = sorted(time_data.keys())
+        avg_queue = [np.mean(time_data[t]) for t in times]
+        
+        color = COLORS.get(strategy, "#888888")
+        ax.plot(times, avg_queue, label=strategy, color=color, linewidth=2)
+
+    ax.set_xlabel("Timp de simulare (minute)")
+    ax.set_ylabel("Număr mediu de pacienți în coadă")
+    ax.set_title("Evoluția aglomerării în timp (inclusiv Orele de Vârf)")
+    ax.legend(title="Strategie")
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, "6_congestion_over_time.png"), dpi=150)
+    plt.close()
+

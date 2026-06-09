@@ -17,8 +17,8 @@ def main():
 
     # Configurare implicita
     config = SimulationConfig(
-        num_doctors=3,
-        num_nurses=2,
+        num_doctors=10,
+        num_nurses=20,
         arrival_rate=12.0,
         simulation_duration=480.0,    # 8 ore
         warmup_period=60.0,

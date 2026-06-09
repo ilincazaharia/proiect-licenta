@@ -29,18 +29,35 @@ class EmergencyDepartment:
         self.patients_treated = []
         self.patients_in_system = []
         self.patient_counter = 0
+        self.congestion_logs = []
 
     def run(self):
         """Porneste simularea."""
         self.env.process(self._generate_arrivals())
+        self.env.process(self._monitor_congestion())
         self.env.run(until=self.config.simulation_duration)
 
-    def _generate_arrivals(self):
-        """Genereaza sosiri de pacienti (proces Poisson)."""
-        # Interval mediu intre sosiri (in minute)
-        mean_interarrival = 60.0 / self.config.arrival_rate
-
+    def _monitor_congestion(self):
+        """Salveaza lungimea cozilor la intervale regulate."""
         while True:
+            self.congestion_logs.append({
+                "time": self.env.now,
+                "doctors_queue": len(self.doctors.queue),
+                "nurses_queue": len(self.nurses.queue)
+            })
+            yield self.env.timeout(5.0)
+
+    def _generate_arrivals(self):
+        """Genereaza sosiri de pacienti (proces Poisson ne-stationar)."""
+        while True:
+            # Calcul rata curenta in functie de orele de varf
+            current_rate = self.config.arrival_rate
+            if self.config.peak_start_min <= self.env.now <= (self.config.peak_start_min + self.config.peak_duration_min):
+                current_rate *= self.config.peak_multiplier
+
+            # Interval mediu intre sosiri (in minute)
+            mean_interarrival = 60.0 / current_rate
+            
             # Timp pana la urmatoarea sosire (distributie exponentiala)
             interarrival_time = self.rng.exponential(mean_interarrival)
             yield self.env.timeout(interarrival_time)
@@ -75,15 +92,19 @@ class EmergencyDepartment:
     def _patient_process(self, patient: Patient):
         """Procesul complet al unui pacient in UPU."""
 
-        # 1. Triaj (la asistenta)
-        with self.nurses.request() as req:
-            yield req
+        # 1. Triaj (la asistenta) - Codul Rosu bypass-eaza coada de triaj si are timp de triaj 0
+        if patient.triage_level == TriageLevel.RED:
             patient.triage_start_time = self.env.now
-
-            # Triajul dureaza 3-7 minute
-            triage_duration = self.rng.uniform(3, 7)
-            yield self.env.timeout(triage_duration)
             patient.triage_end_time = self.env.now
+        else:
+            with self.nurses.request() as req:
+                yield req
+                patient.triage_start_time = self.env.now
+
+                # Triajul dureaza 3-7 minute
+                triage_duration = self.rng.uniform(3, 7)
+                yield self.env.timeout(triage_duration)
+                patient.triage_end_time = self.env.now
 
         # 2. Asteptare + Tratament (la medic, cu prioritate)
         priority = self.strategy.get_priority(patient, self.env.now)

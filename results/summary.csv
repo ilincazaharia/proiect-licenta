@@ -1,6 +1,4 @@
 strategy,avg_waiting_time_mean,avg_waiting_time_ci_low,avg_waiting_time_ci_high,avg_los_mean,avg_los_ci_low,avg_los_ci_high,total_patients_mean,total_patients_ci_low,total_patients_ci_high,target_compliance_mean,target_compliance_ci_low,target_compliance_ci_high
-FIFO,78.16,67.49,88.84,97.66,86.88,108.43,55.2,53.67,56.73,56.19,50.22,62.15
-Priority + FIFO,46.34,41.07,51.6,69.96,64.33,75.58,46.4,44.3,48.5,61.68,54.52,68.85
-Priority Strict,46.34,41.07,51.6,69.96,64.33,75.58,46.4,44.3,48.5,61.68,54.52,68.85
-Round Robin Ponderat,34.99,31.0,38.97,58.46,53.99,62.93,47.13,44.94,49.33,70.28,64.6,75.96
-SJF (Shortest Job First),24.77,22.26,27.28,41.15,38.51,43.78,67.73,66.36,69.11,88.36,86.79,89.93
+FIFO,5.58,5.2,5.96,25.03,24.49,25.57,103.53,99.14,107.93,98.8,98.21,99.39
+Priority + FIFO,5.75,5.25,6.24,25.19,24.57,25.81,103.53,99.14,107.93,99.15,98.8,99.51
+Priority Strict,5.75,5.25,6.24,25.19,24.57,25.81,103.53,99.14,107.93,99.15,98.8,99.51

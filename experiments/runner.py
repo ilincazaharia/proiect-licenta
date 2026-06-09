@@ -21,6 +21,7 @@ def run_single_simulation(config: SimulationConfig, strategy: QueueStrategy, see
     metrics = compute_metrics(patients)
     metrics["strategy"] = strategy.name
     metrics["seed"] = seed
+    metrics["congestion_logs"] = department.congestion_logs
     return metrics
 
 
