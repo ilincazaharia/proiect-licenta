@@ -22,7 +22,7 @@ class EmergencyDepartment:
         self.rng = rng
 
         # Resurse SimPy
-        self.nurses = simpy.Resource(env, capacity=config.num_nurses)
+        self.nurses = simpy.PriorityResource(env, capacity=config.num_nurses)
         self.doctors = simpy.PriorityResource(env, capacity=config.num_doctors)
 
         # Rezultate
@@ -97,12 +97,14 @@ class EmergencyDepartment:
     def _patient_process(self, patient: Patient):
         """Procesul complet al unui pacient in UPU."""
 
-        # 1. Triaj (la asistenta) - Codul Rosu bypass-eaza coada de triaj si are timp de triaj 0
+        # 1. Triaj (la asistenta) - Codul Rosu are prioritate maxima si timp de triaj 0 (dar asteapta un asistent daca toti sunt ocupati)
         if patient.triage_level == TriageLevel.RED:
-            patient.triage_start_time = self.env.now
-            patient.triage_end_time = self.env.now
+            with self.nurses.request(priority=(0, patient.arrival_time)) as req:
+                yield req
+                patient.triage_start_time = self.env.now
+                patient.triage_end_time = self.env.now
         else:
-            with self.nurses.request() as req:
+            with self.nurses.request(priority=(1, patient.arrival_time)) as req:
                 yield req
                 patient.triage_start_time = self.env.now
 

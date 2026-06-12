@@ -4,7 +4,7 @@ from services.auth_service import AuthService
 from domain.models import User
 
 class DoctorService:
-    # Listă statică de specializări definită conform cerințelor
+    # Listă statică de specializări în limba română
     SPECIALTIES = [
         "Urgențe",
         "Cardiologie",
@@ -20,7 +20,7 @@ class DoctorService:
         self.auth_service = auth_service or AuthService(self.user_repo)
 
     def get_all_specialties(self) -> List[str]:
-        """Returnează lista statică de specializări."""
+        """Returnează lista statică de specializări în engleză."""
         return self.SPECIALTIES
 
     def get_all_doctors(self) -> List[User]:
@@ -34,24 +34,28 @@ class DoctorService:
             return True, "Contul de medic a fost șters cu succes."
         return False, "Eroare la ștergerea contului de medic."
 
-    def register_doctor(self, nume: str, prenume: str, email: str, password: str, specialty: str) -> Tuple[bool, str]:
+    def register_doctor(self, last_name: str, first_name: str, email: str, password: str, specialty_name: str) -> Tuple[bool, str]:
         """
         Înregistrează un cont nou de medic (urgente sau sectie) pe baza specializării alese.
-        Dacă specializarea este "Urgențe", rolul va fi 'medic_urgente'.
+        Dacă specializarea este "Emergency", rolul va fi 'medic_urgente'.
         Altfel, rolul va fi 'medic_sectie' cu specializarea respectivă.
         """
-        specialty = specialty.strip()
-        if specialty == "Urgențe":
+        specialty_name = specialty_name.strip()
+        if specialty_name == "Urgențe":
             target_role = "medic_urgente"
         else:
             target_role = "medic_sectie"
             
+        specialty_id = self.user_repo.get_specialty_id_by_name(specialty_name)
+        if not specialty_id:
+            return False, "Specializarea aleasă este invalidă."
+            
         success, msg = self.auth_service.register_user(
-            nume=nume,
-            prenume=prenume,
+            last_name=last_name,
+            first_name=first_name,
             email=email,
             password=password,
             role=target_role,
-            specialty=specialty
+            specialty_id=specialty_id
         )
         return success, msg

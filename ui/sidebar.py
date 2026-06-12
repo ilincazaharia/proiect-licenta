@@ -5,7 +5,7 @@ class SidebarView:
     def render(logout_callback) -> dict:
         """Randează sidebar-ul cu utilizatorul conectat și parametrii de configurare."""
         st.sidebar.header("Utilizator conectat")
-        st.sidebar.text(f"{st.session_state.user_info['prenume']} {st.session_state.user_info['nume']}")
+        st.sidebar.text(f"{st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
         st.sidebar.text(st.session_state.user_info['email'])
         
         role_label = "Manager" if st.session_state.user_info['role'] == 'manager' else "Medic"

@@ -29,10 +29,10 @@ class AuthView:
                                 st.session_state.user_info = {
                                     "id": user.id,
                                     "email": user.email,
-                                    "nume": user.nume,
-                                    "prenume": user.prenume,
+                                    "last_name": user.last_name,
+                                    "first_name": user.first_name,
                                     "role": user.role,
-                                    "specialty": user.specialty
+                                    "specialty_name": user.specialty_name
                                 }
                                 st.query_params["user_id"] = str(user.id)
                                 st.rerun()
@@ -54,7 +54,7 @@ class AuthView:
                         elif password_reg != password_confirm:
                             st.error("Parolele nu coincid.")
                         else:
-                            success, message = auth_service.register_user(nume, prenume, email_reg, password_reg)
+                            success, message = auth_service.register_user(last_name=nume, first_name=prenume, email=email_reg, password=password_reg)
                             if success:
                                 st.success("Contul a fost creat cu succes. Va puteti conecta din tab-ul Conectare.")
                             else:

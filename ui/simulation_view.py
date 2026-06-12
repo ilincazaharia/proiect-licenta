@@ -200,7 +200,7 @@ class SimulationView:
             
             # --- TABEL COMPARATIV CU PRAGURILE ---
             st.subheader("Analiză Timpi Așteptare vs. Praguri Maxim Admise")
-            st.markdown("Comparație detaliată a timpilor medii de așteptare obținuți în simulare, raportați la limitele din protocolul național de triaj.")
+            st.markdown("Comparație a timpilor medii de așteptare obținuți în simulare, raportați la limitele din protocolul național de triaj.")
             
             levels_info = []
             levels = [1, 2, 3, 4, 5]

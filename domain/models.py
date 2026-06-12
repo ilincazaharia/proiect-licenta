@@ -4,29 +4,30 @@ from typing import Optional, Dict, List, Any
 @dataclass
 class User:
     id: Optional[int]
-    nume: str
-    prenume: str
+    last_name: str
+    first_name: str
     email: str
     role: str = "manager"
-    specialty: Optional[str] = None
+    specialty_id: Optional[int] = None
+    specialty_name: Optional[str] = None
 
 @dataclass
 class PatientEntity:
     id: Optional[int]
     cnp: str
-    nume: str
-    prenume: str
+    last_name: str
+    first_name: str
 
 @dataclass
 class Referral:
     id: Optional[int]
     patient_id: int
     triage_level: str
-    specialty: str
+    specialty_id: int
     sender_id: int
     receiver_id: Optional[int] = None
     status: str = "in_asteptare"
-    observatii: Optional[str] = None
+    observations: Optional[str] = None
     response_notes: Optional[str] = None
     
     # Helper fields for joined views in UI
@@ -34,6 +35,7 @@ class Referral:
     patient_cnp: Optional[str] = None
     sender_name: Optional[str] = None
     receiver_name: Optional[str] = None
+    specialty_name: Optional[str] = None
 
 @dataclass
 class SimulationRun:

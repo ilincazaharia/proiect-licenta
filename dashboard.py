@@ -8,9 +8,9 @@ from services.patient_service import PatientService
 from services.referral_service import ReferralService
 from ui.auth_view import AuthView
 from ui.sidebar import SidebarView
-from ui.simulation_view import SimulationView
-from ui.doctor_view import DoctorView
-from ui.referral_view import ReferralView
+from ui.manager_view import ManagerView
+from ui.doctor_upu_view import DoctorUPUView
+from ui.doctor_sectie_view import DoctorSectieView
 
 # Inițializare bază de date SQLite
 DBConnection.init_db()
@@ -42,10 +42,10 @@ if not st.session_state.logged_in and "user_id" in st.query_params:
             st.session_state.user_info = {
                 "id": user.id,
                 "email": user.email,
-                "nume": user.nume,
-                "prenume": user.prenume,
+                "last_name": user.last_name,
+                "first_name": user.first_name,
                 "role": user.role,
-                "specialty": user.specialty
+                "specialty_name": user.specialty_name
             }
     except Exception as e:
         pass
@@ -94,31 +94,26 @@ user_role = st.session_state.user_info.get("role", "manager")
 
 if user_role == "manager":
     st.title("Dashboard Simulare UPU")
-    st.markdown("Acest panou de control permite vizualizarea și analizarea performanțelor Unităților de Primiri Urgențe (UPU) prin simularea fluxului de pacienți.")
+    st.markdown("Acest panou de control permite analiza performanțelor UPU prin simularea fluxului de pacienți.")
 
     # 1. Randare sidebar configurare și preluare date
     config_sidebar_data = SidebarView.render(logout)
 
     # 2. Configurare tab-uri principale manager
-    tab_sim, tab_med = st.tabs(["Rulare & Rezultate active", "Administrare Medici"])
-
-    with tab_sim:
-        SimulationView.render(
-            simulation_service=simulation_service,
-            user_id=st.session_state.user_info["id"],
-            config_sidebar_data=config_sidebar_data
-        )
-
-    with tab_med:
-        DoctorView.render(doctor_service=doctor_service)
+    ManagerView.render(
+        simulation_service=simulation_service,
+        doctor_service=doctor_service,
+        user_id=st.session_state.user_info["id"],
+        config_sidebar_data=config_sidebar_data
+    )
 
 else:
     # --- PANOU CONTROL MEDIC ---
     st.sidebar.header("Utilizator conectat")
-    st.sidebar.text(f"{st.session_state.user_info['prenume']} {st.session_state.user_info['nume']}")
+    st.sidebar.text(f"{st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
     st.sidebar.text(st.session_state.user_info['email'])
     
-    role_display = "Medic Urgențe" if user_role == "medic_urgente" else f"Medic Secție - {st.session_state.user_info.get('specialty', 'Nespecificat')}"
+    role_display = "Medic Urgențe" if user_role == "medic_urgente" else f"Medic Secție - {st.session_state.user_info.get('specialty_name', 'Nespecificat')}"
     st.sidebar.text(f"Rol: {role_display}")
     
     if st.sidebar.button("Deconectare", type="secondary", use_container_width=True):
@@ -127,18 +122,19 @@ else:
     
     if user_role == "medic_urgente":
         st.title("Dashboard Medic Urgențe")
-        st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['prenume']} {st.session_state.user_info['nume']}")
-        ReferralView.render_doctor_urgente(
+        st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
+        DoctorUPUView.render(
             user_info=st.session_state.user_info,
             patient_service=patient_service,
             referral_service=referral_service
         )
             
     elif user_role == "medic_sectie":
-        spec_name = st.session_state.user_info.get('specialty', 'Nespecificat')
+        spec_name = st.session_state.user_info.get('specialty_name', 'Nespecificat')
         st.title(f"Dashboard Medic Secție: {spec_name}")
-        st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['prenume']} {st.session_state.user_info['nume']}")
-        ReferralView.render_doctor_sectie(
+        st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
+        DoctorSectieView.render(
             user_info=st.session_state.user_info,
-            referral_service=referral_service
+            referral_service=referral_service,
+            patient_service=patient_service
         )

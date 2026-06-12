@@ -12,16 +12,17 @@ class ReferralRepository:
             id=row[0],
             patient_id=row[1],
             triage_level=row[2],
-            specialty=row[3],
+            specialty_id=row[3],
             sender_id=row[4],
             receiver_id=row[5],
             status=row[6],
-            observatii=row[7],
+            observations=row[7],
             response_notes=row[8],
             patient_name=row[9],
             patient_cnp=row[10],
             sender_name=row[11],
-            receiver_name=row[12]
+            receiver_name=row[12],
+            specialty_name=row[13]
         )
 
     def create(self, referral: Referral) -> bool:
@@ -30,15 +31,15 @@ class ReferralRepository:
             conn = DBConnection.get_connection()
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO referrals (patient_id, triage_level, specialty, sender_id, status, observatii)
+                INSERT INTO referrals (patient_id, triage_level, specialty_id, sender_id, status, observations)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 referral.patient_id,
                 referral.triage_level,
-                referral.specialty,
+                referral.specialty_id,
                 referral.sender_id,
                 referral.status,
-                referral.observatii
+                referral.observations
             ))
             conn.commit()
             conn.close()
@@ -52,14 +53,16 @@ class ReferralRepository:
         conn = DBConnection.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT r.id, r.patient_id, r.triage_level, r.specialty, r.sender_id, r.receiver_id, r.status, r.observatii, r.response_notes,
-                   (p.prenume || ' ' || p.nume) as patient_name, p.cnp as patient_cnp,
-                   (u_send.prenume || ' ' || u_send.nume) as sender_name,
-                   (u_rec.prenume || ' ' || u_rec.nume) as receiver_name
+            SELECT r.id, r.patient_id, r.triage_level, r.specialty_id, r.sender_id, r.receiver_id, r.status, r.observations, r.response_notes,
+                   (p.first_name || ' ' || p.last_name) as patient_name, p.cnp as patient_cnp,
+                   (u_send.first_name || ' ' || u_send.last_name) as sender_name,
+                   (u_rec.first_name || ' ' || u_rec.last_name) as receiver_name,
+                   s.name as specialty_name
             FROM referrals r
             INNER JOIN patients p ON r.patient_id = p.id
             INNER JOIN users u_send ON r.sender_id = u_send.id
             LEFT JOIN users u_rec ON r.receiver_id = u_rec.id
+            INNER JOIN specialties s ON r.specialty_id = s.id
             WHERE r.sender_id = ?
             ORDER BY r.id DESC
         """, (sender_id,))
@@ -67,42 +70,46 @@ class ReferralRepository:
         conn.close()
         return [self._row_to_referral(row) for row in rows]
 
-    def get_pending_by_specialty(self, specialty: str) -> List[Referral]:
+    def get_pending_by_specialty(self, specialty_name: str) -> List[Referral]:
         """Obține trimiterile aflate în așteptare pentru o secție specializată."""
         conn = DBConnection.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT r.id, r.patient_id, r.triage_level, r.specialty, r.sender_id, r.receiver_id, r.status, r.observatii, r.response_notes,
-                   (p.prenume || ' ' || p.nume) as patient_name, p.cnp as patient_cnp,
-                   (u_send.prenume || ' ' || u_send.nume) as sender_name,
-                   (u_rec.prenume || ' ' || u_rec.nume) as receiver_name
+            SELECT r.id, r.patient_id, r.triage_level, r.specialty_id, r.sender_id, r.receiver_id, r.status, r.observations, r.response_notes,
+                   (p.first_name || ' ' || p.last_name) as patient_name, p.cnp as patient_cnp,
+                   (u_send.first_name || ' ' || u_send.last_name) as sender_name,
+                   (u_rec.first_name || ' ' || u_rec.last_name) as receiver_name,
+                   s.name as specialty_name
             FROM referrals r
             INNER JOIN patients p ON r.patient_id = p.id
             INNER JOIN users u_send ON r.sender_id = u_send.id
             LEFT JOIN users u_rec ON r.receiver_id = u_rec.id
-            WHERE LOWER(r.specialty) = ? AND r.status = 'in_asteptare'
+            INNER JOIN specialties s ON r.specialty_id = s.id
+            WHERE LOWER(s.name) = ? AND r.status = 'in_asteptare'
             ORDER BY r.id ASC
-        """, (specialty.lower().strip(),))
+        """, (specialty_name.lower().strip(),))
         rows = cursor.fetchall()
         conn.close()
         return [self._row_to_referral(row) for row in rows]
 
-    def get_accepted_by_specialty(self, specialty: str) -> List[Referral]:
+    def get_accepted_by_specialty(self, specialty_name: str) -> List[Referral]:
         """Obține pacienții acceptați (internați în prezent) pe o secție specializată."""
         conn = DBConnection.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT r.id, r.patient_id, r.triage_level, r.specialty, r.sender_id, r.receiver_id, r.status, r.observatii, r.response_notes,
-                   (p.prenume || ' ' || p.nume) as patient_name, p.cnp as patient_cnp,
-                   (u_send.prenume || ' ' || u_send.nume) as sender_name,
-                   (u_rec.prenume || ' ' || u_rec.nume) as receiver_name
+            SELECT r.id, r.patient_id, r.triage_level, r.specialty_id, r.sender_id, r.receiver_id, r.status, r.observations, r.response_notes,
+                   (p.first_name || ' ' || p.last_name) as patient_name, p.cnp as patient_cnp,
+                   (u_send.first_name || ' ' || u_send.last_name) as sender_name,
+                   (u_rec.first_name || ' ' || u_rec.last_name) as receiver_name,
+                   s.name as specialty_name
             FROM referrals r
             INNER JOIN patients p ON r.patient_id = p.id
             INNER JOIN users u_send ON r.sender_id = u_send.id
             LEFT JOIN users u_rec ON r.receiver_id = u_rec.id
-            WHERE LOWER(r.specialty) = ? AND r.status = 'acceptat'
+            INNER JOIN specialties s ON r.specialty_id = s.id
+            WHERE LOWER(s.name) = ? AND r.status = 'acceptat'
             ORDER BY r.id DESC
-        """, (specialty.lower().strip(),))
+        """, (specialty_name.lower().strip(),))
         rows = cursor.fetchall()
         conn.close()
         return [self._row_to_referral(row) for row in rows]
@@ -123,3 +130,26 @@ class ReferralRepository:
         except Exception as e:
             print(f"Eroare în ReferralRepository.update_status: {e}")
             return False
+
+    def get_by_id(self, referral_id: int) -> Optional[Referral]:
+        """Obține o trimitere după ID."""
+        conn = DBConnection.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT r.id, r.patient_id, r.triage_level, r.specialty_id, r.sender_id, r.receiver_id, r.status, r.observations, r.response_notes,
+                   (p.first_name || ' ' || p.last_name) as patient_name, p.cnp as patient_cnp,
+                   (u_send.first_name || ' ' || u_send.last_name) as sender_name,
+                   (u_rec.first_name || ' ' || u_rec.last_name) as receiver_name,
+                   s.name as specialty_name
+            FROM referrals r
+            INNER JOIN patients p ON r.patient_id = p.id
+            INNER JOIN users u_send ON r.sender_id = u_send.id
+            LEFT JOIN users u_rec ON r.receiver_id = u_rec.id
+            INNER JOIN specialties s ON r.specialty_id = s.id
+            WHERE r.id = ?
+        """, (referral_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return self._row_to_referral(row)
+        return None
