@@ -113,16 +113,15 @@ else:
     st.sidebar.text(f"{st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
     st.sidebar.text(st.session_state.user_info['email'])
     
-    role_display = "Medic Urgențe" if user_role == "medic_urgente" else f"Medic Secție - {st.session_state.user_info.get('specialty_name', 'Nespecificat')}"
-    st.sidebar.text(f"Rol: {role_display}")
+    role_display = "Medic Urgențe" if user_role == "medic_urgente" else f"Medic {st.session_state.user_info.get('specialty_name', 'Nespecificat')}"
+    st.sidebar.text(role_display)
     
     if st.sidebar.button("Deconectare", type="secondary", use_container_width=True):
         logout()
     st.sidebar.markdown("---")
     
     if user_role == "medic_urgente":
-        st.title("Dashboard Medic Urgențe")
-        st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
+        st.title(f"Bine ați venit, Dr. {st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
         DoctorUPUView.render(
             user_info=st.session_state.user_info,
             patient_service=patient_service,
@@ -131,8 +130,7 @@ else:
             
     elif user_role == "medic_sectie":
         spec_name = st.session_state.user_info.get('specialty_name', 'Nespecificat')
-        st.title(f"Dashboard Medic Secție: {spec_name}")
-        st.subheader(f"Bine ați venit, Dr. {st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
+        st.title(f"Bine ați venit, Dr. {st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
         DoctorSectieView.render(
             user_info=st.session_state.user_info,
             referral_service=referral_service,

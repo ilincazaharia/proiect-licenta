@@ -14,7 +14,7 @@ class DoctorSectieView:
 
         # Căutare generală pacient pentru vizualizare istoric
         st.subheader("Căutare Pacient și Vizualizare Istoric")
-        search_cnp = st.text_input("Introduceți CNP pacient pentru istoric medical", max_chars=13, key="search_cnp_sectie")
+        search_cnp = st.text_input("Introduceți CNP pacient", max_chars=13, key="search_cnp_sectie")
         if search_cnp:
             search_cnp = search_cnp.strip()
             if not search_cnp.isdigit() or len(search_cnp) != 13:
@@ -26,10 +26,10 @@ class DoctorSectieView:
                     status = patient_service.get_patient_status(patient.id)
                     status_translation = {
                         "inregistrare": "Înregistrat",
-                        "trimis_sectie": "În așteptare pe secție / În UPU",
+                        "trimis_sectie": "În așteptare pe secție",
                         "internat": "Internat pe secție",
-                        "refuzat": "Refuzat / Externat din UPU",
-                        "externat": "Externat (Disponibil)"
+                        "refuzat": "Refuzat",
+                        "externat": "Externat"
                     }
                     st.info(f"**Stare curentă pacient:** {status_translation.get(status, status)}")
                     with st.expander("Vizualizare Istoric Medical Pacient", expanded=True):
@@ -43,11 +43,11 @@ class DoctorSectieView:
     @st.fragment(run_every=5)
     @staticmethod
     def render_sectie_fragment(user_info: dict, referral_service: ReferralService, patient_service: PatientService, specialty: str):
-        st.subheader("Solicitări Noi de Internare (în așteptare)")
+        st.subheader("Solicitări Noi de Internare")
         pending_referrals = referral_service.get_pending_referrals_for_specialty(specialty)
         
         if not pending_referrals:
-            st.info("Nu există solicitări noi în așteptare pentru secția dumneavoastră.")
+            st.info("Nu există solicitări noi de internare.")
         else:
             for r in pending_referrals:
                 with st.container(border=True):
@@ -104,7 +104,7 @@ class DoctorSectieView:
                     with col_p1:
                         st.write(f"**Pacient:** {r.patient_name} (CNP: {r.patient_cnp})")
                         st.write(f"**Nivel Triaj UPU:** {r.triage_level}")
-                        st.write(f"**Medic Trimițător:** Dr. {r.sender_name}")
+                        st.write(f"**Medic:** Dr. {r.sender_name}")
                         st.write(f"**Observații UPU:** {r.observations or '-'}")
                         st.write(f"**Note Internare:** {r.response_notes or '-'}")
                         with st.expander("Vizualizare Istoric Medical"):

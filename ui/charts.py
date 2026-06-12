@@ -56,7 +56,7 @@ class ChartsView:
             ax2.set_xticks(x)
             ax2.set_xticklabels(short_names)
             ax2.set_ylabel("Minute")
-            ax2.set_title("Timp Mediu de Așteptare vs. Prag legal de triaj")
+            ax2.set_title("Timp Mediu de Așteptare vs. Timp Țintă")
             ax2.legend()
             ax2.grid(True, linestyle="--", alpha=0.5)
             plt.tight_layout()
@@ -75,7 +75,7 @@ class ChartsView:
             
             colors = ["#C25953", "#D4AC0D", "#52BE80", "#5DADE2", "#BDC3C7"]
             bars = ax3.bar(short_names, compliance_rates, color=colors, edgecolor="white", width=0.5)
-            ax3.set_ylabel("Procent Conformitate (%)")
+            ax3.set_ylabel("Procent Conformitate")
             ax3.set_title("Rata de conformitate cu timpul țintă")
             ax3.set_ylim(0, 105)
             

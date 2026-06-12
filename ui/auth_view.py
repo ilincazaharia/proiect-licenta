@@ -9,7 +9,7 @@ class AuthView:
         with col2:
             st.write("")
             st.write("")
-            st.title("Autentificare Simulare UPU")
+            st.title("Autentificare UPU")
             
             tab_login, tab_register = st.tabs(["Conectare", "Inregistrare"])
             

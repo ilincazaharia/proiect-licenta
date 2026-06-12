@@ -9,7 +9,7 @@ from simulation.strategies import QueueStrategy
 
 class EmergencyDepartment:
     """
-    Simuleaza o Unitate de Primiri Urgente (UPU).
+    Simuleaza o Unitate de Primiri Urgente.
 
     Fluxul pacientului:
         Sosire -> Triaj (asistenta) -> Coada de asteptare -> Tratament (medic) -> Iesire
@@ -32,14 +32,12 @@ class EmergencyDepartment:
         self.congestion_logs = []
 
     def run(self):
-        """Porneste simularea."""
         self.env.process(self._generate_arrivals())
         self.env.process(self._monitor_congestion())
-        # Rulează până când toate evenimentele s-au finalizat (toți pacienții sosiți au terminat tratamentul)
         self.env.run()
 
     def _monitor_congestion(self):
-        """Salveaza lungimea cozilor la intervale regulate pana la limita duratei simularii."""
+        # Salveaza periodic informatii despre lungimea cozilor 
         while self.env.now <= self.config.simulation_duration:
             self.congestion_logs.append({
                 "time": self.env.now,
@@ -49,17 +47,16 @@ class EmergencyDepartment:
             yield self.env.timeout(5.0)
 
     def _generate_arrivals(self):
-        """Genereaza sosiri de pacienti (proces Poisson ne-stationar) pana la limita programului."""
         while self.env.now < self.config.simulation_duration:
             # Calcul rata curenta in functie de orele de varf
             current_rate = self.config.arrival_rate
             if self.config.peak_start_min <= self.env.now <= (self.config.peak_start_min + self.config.peak_duration_min):
                 current_rate *= self.config.peak_multiplier
 
-            # Interval mediu intre sosiri (in minute)
+            # Interval mediu intre sosiri
             mean_interarrival = 60.0 / current_rate
             
-            # Timp pana la urmatoarea sosire (distributie exponentiala)
+            # Timp pana la urmatoarea sosire
             interarrival_time = self.rng.exponential(mean_interarrival)
             
             if self.env.now + interarrival_time >= self.config.simulation_duration:
@@ -97,23 +94,25 @@ class EmergencyDepartment:
     def _patient_process(self, patient: Patient):
         """Procesul complet al unui pacient in UPU."""
 
-        # 1. Triaj (la asistenta) - Codul Rosu are prioritate maxima si timp de triaj 0 (dar asteapta un asistent daca toti sunt ocupati)
+        # 1. Triaj (la asistenta)
         if patient.triage_level == TriageLevel.RED:
+            # Codul Rosu are prioritate maxima (priority=0)
             with self.nurses.request(priority=(0, patient.arrival_time)) as req:
                 yield req
                 patient.triage_start_time = self.env.now
                 patient.triage_end_time = self.env.now
         else:
+            # Codurile celelalte au prioritate mai mica (priority=1)
             with self.nurses.request(priority=(1, patient.arrival_time)) as req:
                 yield req
                 patient.triage_start_time = self.env.now
 
-                # Triajul dureaza 3-7 minute
+                # Triajul dureaza 3-7 minute daca nu e Cod Rosu
                 triage_duration = self.rng.uniform(3, 7)
                 yield self.env.timeout(triage_duration)
                 patient.triage_end_time = self.env.now
 
-        # 2. Asteptare + Tratament (la medic, cu prioritate)
+        # 2. Asteptare + Tratament (la medic)
         priority = self.strategy.get_priority(patient, self.env.now)
         with self.doctors.request(priority=priority) as req:
             yield req
@@ -123,7 +122,7 @@ class EmergencyDepartment:
             yield self.env.timeout(patient.treatment_duration)
             patient.treatment_end_time = self.env.now
 
-        # Pacientul a terminat
+        # Iesire din sistem
         self.patients_treated.append(patient)
 
     def get_results(self):

@@ -19,7 +19,7 @@ class DoctorUtils:
             "externat": ("Externare Secție", "violet")
         }
 
-        st.markdown("##### Istoric Medical Cronologic (Patient Logs)")
+        st.markdown("##### Istoric Medical")
         for log in logs:
             ev_type = log["event_type"]
             meta = event_meta.get(ev_type, (ev_type.capitalize(), "grey"))
