@@ -142,8 +142,8 @@ class DoctorUPUView:
                     <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05);"><span style="{triage_style}">{r.triage_level}</span></td>
                     <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05); color: #f0f2f6;">{r.specialty_name}</td>
                     <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05);"><span style="{status_style}">{st_color[3]}</span></td>
-                    <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05); color: #f0f2f6; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{obs}">{obs}</td>
-                    <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05); border-radius: 0 8px 8px 0; color: #a3a8b4; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{resp}">{resp}</td>
+                    <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05); color: #f0f2f6; max-width: 220px; word-wrap: break-word;">{obs}</td>
+                    <td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.05); border-radius: 0 8px 8px 0; color: #a3a8b4; max-width: 220px; word-wrap: break-word;">{resp}</td>
                 </tr>
                 """).strip()
                 
