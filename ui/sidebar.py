@@ -42,6 +42,58 @@ class SidebarView:
      
         st.sidebar.subheader("Distribuție Coduri Triaj")
         with st.sidebar.container(border=True):
+            # Injectăm CSS pentru colorarea fiecărui slider în funcție de nivelul de triaj
+            st.markdown(
+                """
+                <style>
+                /* 1. Cod Roșu Slider */
+                div[class*="st-key-slider_p_red"] div[role="slider"] {
+                    background-color: #D32F2F !important;
+                    border-color: #D32F2F !important;
+                }
+                div[class*="st-key-slider_p_red"] div[data-baseweb="slider"] > div:has(div[role="slider"]) > div {
+                    background-color: #D32F2F !important;
+                    background: #D32F2F !important;
+                }
+                
+                /* 2. Cod Galben Slider */
+                div[class*="st-key-slider_p_yellow"] div[role="slider"] {
+                    background-color: #F39C12 !important;
+                    border-color: #F39C12 !important;
+                }
+                div[class*="st-key-slider_p_yellow"] div[data-baseweb="slider"] > div:has(div[role="slider"]) > div {
+                    background-color: #F39C12 !important;
+                    background: #F39C12 !important;
+                }
+                
+                /* 3. Cod Verde Slider */
+                div[class*="st-key-slider_p_green"] div[role="slider"] {
+                    background-color: #2ECC71 !important;
+                    border-color: #2ECC71 !important;
+                }
+                div[class*="st-key-slider_p_green"] div[data-baseweb="slider"] > div:has(div[role="slider"]) > div {
+                    background-color: #2ECC71 !important;
+                    background: #2ECC71 !important;
+                }
+                
+                /* 4. Cod Albastru Slider */
+                div[class*="st-key-slider_p_blue"] div[role="slider"] {
+                    background-color: #3498DB !important;
+                    border-color: #3498DB !important;
+                }
+                div[class*="st-key-slider_p_blue"] div[data-baseweb="slider"] > div:has(div[role="slider"]) > div {
+                    background-color: #3498DB !important;
+                    background: #3498DB !important;
+                }
+                
+                /* Forțează textul numerelor (min, max și valoarea curentă) să rămână albe/neutre */
+                div[class*="st-key-slider_p_"] div[data-baseweb="slider"] div {
+                    color: #ffffff !important;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
             st.markdown('<span style="color:#D32F2F; font-weight:bold;">■ Cod Roșu (Nivel 1)</span>', unsafe_allow_html=True)
             p_red = st.slider(
                 "Procent Cod Roșu", 

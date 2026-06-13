@@ -94,7 +94,6 @@ user_role = st.session_state.user_info.get("role", "manager")
 
 if user_role == "manager":
     st.title("Dashboard Simulare UPU")
-    st.markdown("Acest panou de control permite analiza performanțelor UPU prin simularea fluxului de pacienți.")
 
     # 1. Randare sidebar configurare și preluare date
     config_sidebar_data = SidebarView.render(logout)

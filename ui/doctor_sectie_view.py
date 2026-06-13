@@ -12,6 +12,49 @@ class DoctorSectieView:
             st.error("Utilizatorul conectat nu este asociat unei secții de specialitate valide.")
             return
 
+        # CSS pentru colorarea butoanelor conform stărilor pacientului (verde pentru internare/acceptare, mov pentru externare)
+        st.markdown(
+            """
+            <style>
+            /* Buton Acceptă - verde (corespunde stării 'internat') */
+            div[class*="st-key-acc_"] button {
+                background-color: #28a745 !important;
+                color: white !important;
+                border-color: #28a745 !important;
+            }
+            div[class*="st-key-acc_"] button:hover {
+                background-color: #218838 !important;
+                border-color: #1e7e34 !important;
+                color: white !important;
+            }
+            div[class*="st-key-acc_"] button:active {
+                background-color: #1e7e34 !important;
+                border-color: #1c7430 !important;
+                color: white !important;
+            }
+            
+            /* Buton Externează - mov (corespunde stării 'externat') */
+            div[class*="st-key-dis_"] button {
+                background-color: #702082 !important;
+                color: white !important;
+                border-color: #702082 !important;
+            }
+            div[class*="st-key-dis_"] button:hover {
+                background-color: #5c186b !important;
+                border-color: #51135e !important;
+                color: white !important;
+            }
+            div[class*="st-key-dis_"] button:active {
+                background-color: #51135e !important;
+                border-color: #460f51 !important;
+                color: white !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+
         # Căutare generală pacient pentru vizualizare istoric
         st.subheader("Căutare Pacient și Vizualizare Istoric")
         search_cnp = st.text_input("Introduceți CNP pacient", max_chars=13, key="search_cnp_sectie")
@@ -53,7 +96,8 @@ class DoctorSectieView:
                 with st.container(border=True):
                     col_p1, col_p2 = st.columns([3, 1])
                     with col_p1:
-                        st.write(f"**Pacient:** {r.patient_name} (CNP: {r.patient_cnp})")
+                        st.markdown(f"#### 👤 **{r.patient_name}**")
+                        st.markdown(f"**CNP:** `{r.patient_cnp}`")
                         st.write(f"**Nivel Triaj:** {r.triage_level}")
                         st.write(f"**Medic Trimițător:** Dr. {r.sender_name}")
                         st.write(f"**Observații UPU:** {r.observations or '-'}")
@@ -102,7 +146,8 @@ class DoctorSectieView:
                 with st.container(border=True):
                     col_p1, col_p2 = st.columns([3, 1])
                     with col_p1:
-                        st.write(f"**Pacient:** {r.patient_name} (CNP: {r.patient_cnp})")
+                        st.markdown(f"#### 👤 **{r.patient_name}**")
+                        st.markdown(f"**CNP:** `{r.patient_cnp}`")
                         st.write(f"**Nivel Triaj UPU:** {r.triage_level}")
                         st.write(f"**Medic:** Dr. {r.sender_name}")
                         st.write(f"**Observații UPU:** {r.observations or '-'}")

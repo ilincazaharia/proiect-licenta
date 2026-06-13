@@ -22,7 +22,21 @@ def run_single_simulation(config: SimulationConfig, strategy: QueueStrategy, see
     metrics["strategy"] = strategy.name
     metrics["seed"] = seed
     metrics["congestion_logs"] = department.congestion_logs
+
+    # Calcul grad de utilizare resurse pe perioada activă (după warmup)
+    active_duration = config.simulation_duration - config.warmup_period
+    if active_duration > 0:
+        total_doc_busy = sum(p.treatment_duration for p in patients)
+        total_nurse_busy = sum((p.triage_end_time - p.triage_start_time) for p in patients if p.triage_start_time >= 0 and p.triage_end_time >= 0)
+        
+        metrics["doctor_utilization"] = min(100.0, (total_doc_busy / (config.num_doctors * active_duration)) * 100.0)
+        metrics["nurse_utilization"] = min(100.0, (total_nurse_busy / (config.num_nurses * active_duration)) * 100.0)
+    else:
+        metrics["doctor_utilization"] = 0.0
+        metrics["nurse_utilization"] = 0.0
+
     return metrics
+
 
 
 def run_experiment(config: SimulationConfig, strategy: QueueStrategy) -> list[dict]:

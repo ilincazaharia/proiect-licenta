@@ -34,7 +34,7 @@ class ManagerView:
                     if selected_label:
                         selected_run = run_options[selected_label]
                         
-                        st.markdown("##### Detalii Configurație Simulare Selectată")
+                        st.markdown("### Detalii Simulare Selectată")
                         col_c1, col_c2, col_c3 = st.columns(3)
                         with col_c1:
                             st.metric("Medici", selected_run.num_doctors)
@@ -204,9 +204,7 @@ class ManagerView:
                 st.markdown("---")
                 
                 # --- TABEL COMPARATIV CU PRAGURILE ---
-                st.subheader("Analiză Timpi Așteptare vs. Praguri Maxim Admise")
-                st.markdown("Comparație detaliată a timpilor medii de așteptare obținuți în simulare, raportați la limitele din protocolul național de triaj.")
-                
+                st.subheader("Analiză Timpi Așteptare vs. Praguri Maxim Admise") 
                 levels_info = []
                 levels = [1, 2, 3, 4, 5]
                 level_names = ["Cod Roșu", "Cod Galben", "Cod Verde", "Cod Albastru", "Cod Alb"]
@@ -235,7 +233,52 @@ class ManagerView:
                         "Status": status
                     })
                     
-                st.dataframe(pd.DataFrame(levels_info), use_container_width=True, hide_index=True)
+                # Construim tabelul HTML stilizat pentru rezultatele simulării
+                html_rows = ""
+                triage_colors = {
+                    "Cod Roșu": ("#ef4444", "#ffffff"),
+                    "Cod Galben": ("#f59e0b", "#ffffff"),
+                    "Cod Verde": ("#10b981", "#ffffff"),
+                    "Cod Albastru": ("#3b82f6", "#ffffff"),
+                    "Cod Alb": ("#6b7280", "#ffffff"),
+                }
+                
+                for info in levels_info:
+                    name = info["Cod Triaj"]
+                    tr_color = triage_colors.get(name, ("#6b7280", "#ffffff"))
+                    triage_style = f"background-color: {tr_color[0]}; color: {tr_color[1]}; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;"
+                    
+                    if info["Status"] == "Conform":
+                        status_style = "background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;"
+                    else:
+                        status_style = "background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;"
+                        
+                    html_rows += f"""<tr>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px 0 0 8px; font-weight: 500;"><span style="{triage_style}">{name}</span></td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); font-weight: bold; color: #f0f2f6;">{info['Timp Mediu Așteptare']:.2f} min</td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); color: #a3a8b4;">{info['Prag / Timp Țintă']}</td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); color: #f0f2f6; font-weight: 500;">{info['Rată Conformitate']}</td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); border-radius: 0 8px 8px 0;"><span style="{status_style}">{info['Status']}</span></td>
+</tr>"""
+                    
+                table_html = f"""<div style="background-color: rgba(255, 255, 255, 0.01); padding: 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 10px;">
+<table style="width: 100%; border-collapse: separate; border-spacing: 0 6px; text-align: left; font-family: inherit;">
+<thead>
+<tr style="color: #a3a8b4; font-weight: 600; font-size: 0.9em;">
+<th style="padding: 10px;">Cod Triaj</th>
+<th style="padding: 10px;">Timp Mediu Așteptare</th>
+<th style="padding: 10px;">Prag / Timp Țintă</th>
+<th style="padding: 10px;">Rată Conformitate</th>
+<th style="padding: 10px;">Status</th>
+</tr>
+</thead>
+<tbody>
+{html_rows}
+</tbody>
+</table>
+</div>"""
+                st.markdown(table_html, unsafe_allow_html=True)
+
                 
                 st.markdown("---")
                 
@@ -246,7 +289,6 @@ class ManagerView:
                 
                 # --- EXPORT / DOWNLOAD ---
                 st.markdown("### Export Date Simulare UPU")
-                st.markdown("Descărcați rezultatele simulării în format CSV.")
                 try:
                     results_csv_bytes = simulation_service.export_detailed_csv(st.session_state.current_results)
                     summary_csv_bytes = simulation_service.export_summary_csv(st.session_state.current_results)
@@ -254,7 +296,7 @@ class ManagerView:
                     col_dl1, col_dl2 = st.columns(2)
                     with col_dl1:
                         st.download_button(
-                            label="Descarcă Date Detaliate (CSV)",
+                            label="Descarcă Date Pacienți Simulare (CSV)",
                             data=results_csv_bytes,
                             file_name=f"{st.session_state.current_run_name.replace(' ', '_')}_detalii.csv",
                             mime="text/csv",
@@ -276,7 +318,6 @@ class ManagerView:
         with tab_med:
             # --- COD MIGRAT DIN DOCTOR_VIEW.PY ---
             st.subheader("Administrare Conturi Medici")
-            st.markdown("Creați noi conturi de medici pe baza specializării acestora și gestionați conturile existente.")
             
             st.write("#### Date Medic Nou")
             col_m1, col_m2 = st.columns(2)

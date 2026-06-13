@@ -230,7 +230,52 @@ class SimulationView:
                     "Status": status
                 })
                 
-            st.dataframe(pd.DataFrame(levels_info), use_container_width=True, hide_index=True)
+            # Construim tabelul HTML stilizat pentru rezultatele simulării
+            html_rows = ""
+            triage_colors = {
+                "Cod Roșu": ("#ef4444", "#ffffff"),
+                "Cod Galben": ("#f59e0b", "#ffffff"),
+                "Cod Verde": ("#10b981", "#ffffff"),
+                "Cod Albastru": ("#3b82f6", "#ffffff"),
+                "Cod Alb": ("#6b7280", "#ffffff"),
+            }
+            
+            for info in levels_info:
+                name = info["Cod Triaj"]
+                tr_color = triage_colors.get(name, ("#6b7280", "#ffffff"))
+                triage_style = f"background-color: {tr_color[0]}; color: {tr_color[1]}; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;"
+                
+                if info["Status"] == "Conform":
+                    status_style = "background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;"
+                else:
+                    status_style = "background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;"
+                    
+                html_rows += f"""<tr>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px 0 0 8px; font-weight: 500;"><span style="{triage_style}">{name}</span></td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); font-weight: bold; color: #f0f2f6;">{info['Timp Mediu Așteptare']:.2f} min</td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); color: #a3a8b4;">{info['Prag / Timp Țintă']}</td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); color: #f0f2f6; font-weight: 500;">{info['Rată Conformitate']}</td>
+<td style="padding: 12px 10px; background-color: rgba(255, 255, 255, 0.03); border-radius: 0 8px 8px 0;"><span style="{status_style}">{info['Status']}</span></td>
+</tr>"""
+                
+            table_html = f"""<div style="background-color: rgba(255, 255, 255, 0.01); padding: 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 10px;">
+<table style="width: 100%; border-collapse: separate; border-spacing: 0 6px; text-align: left; font-family: inherit;">
+<thead>
+<tr style="color: #a3a8b4; font-weight: 600; font-size: 0.9em;">
+<th style="padding: 10px;">Cod Triaj</th>
+<th style="padding: 10px;">Timp Mediu Așteptare</th>
+<th style="padding: 10px;">Prag / Timp Țintă</th>
+<th style="padding: 10px;">Rată Conformitate</th>
+<th style="padding: 10px;">Status</th>
+</tr>
+</thead>
+<tbody>
+{html_rows}
+</tbody>
+</table>
+</div>"""
+            st.markdown(table_html, unsafe_allow_html=True)
+
             
             st.markdown("---")
             
