@@ -1,4 +1,0 @@
-strategy,avg_waiting_time_mean,avg_waiting_time_ci_low,avg_waiting_time_ci_high,avg_los_mean,avg_los_ci_low,avg_los_ci_high,total_patients_mean,total_patients_ci_low,total_patients_ci_high,target_compliance_mean,target_compliance_ci_low,target_compliance_ci_high
-FIFO,34.97,29.58,40.36,57.75,52.28,63.21,179.33,174.76,183.91,77.39,74.12,80.67
-Priority + FIFO,39.39,32.87,45.9,62.17,55.57,68.77,179.33,174.76,183.91,92.36,89.38,95.33
-Priority Strict,39.39,32.87,45.9,62.17,55.57,68.77,179.33,174.76,183.91,92.36,89.38,95.33
