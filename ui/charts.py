@@ -60,7 +60,7 @@ class ChartsView:
             utilizations = [avg_nurse_util, avg_doc_util]
             
             bars = ax4.bar(resources, utilizations, color=["#558A7A", "#3498DB"], edgecolor="white", width=0.4)
-            ax4.set_ylabel("Grad de Ocupare / Utilizare (%)")
+            ax4.set_ylabel("Grad de Utilizare")
             ax4.set_ylim(0, 105)
             ax4.set_title("Gradul mediu de utilizare a resurselor")
             ax4.grid(True, linestyle="--", alpha=0.5)

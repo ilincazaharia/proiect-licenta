@@ -6,15 +6,12 @@ from enum import IntEnum
 
 
 class TriageLevel(IntEnum):
-    """
-    Niveluri de triaj conform protocolului UPU Romania (Ordinul 443/2019).
-    Valoarea numerica = prioritatea (1 = cea mai urgenta).
-    """
-    RED = 1       # Resuscitare — urgenta vitala, interventie imediata
-    YELLOW = 2    # Critic — risc de agravare, < 15 min
-    GREEN = 3     # Urgent — urgenta minora/medie, < 60 min
-    BLUE = 4      # Non-urgent, < 120 min
-    WHITE = 5     # Consult — situatii curente, > 120 min
+    # Prioritatea cea mai mică = cea mai urgenta
+    RED = 1
+    YELLOW = 2
+    GREEN = 3
+    BLUE = 4
+    WHITE = 5
 
     @property
     def color_name(self):
@@ -44,21 +41,21 @@ class Patient:
 
     @property
     def waiting_time(self):
-        """Timp de asteptare = de la sosire pana la inceperea tratamentului."""
+        """Timp de asteptare de la sosire pana la preluarea de către doctor."""
         if self.treatment_start_time < 0:
             return None
         return self.treatment_start_time - self.arrival_time
 
     @property
     def total_time_in_system(self):
-        """Timpul total petrecut in sistem (Length of Stay)."""
+        """Timpul total petrecut in sistem."""
         if self.treatment_end_time < 0:
             return None
         return self.treatment_end_time - self.arrival_time
 
     @property
     def met_target(self):
-        """A fost tratat in timpul tinta?"""
+        """Returneaza T/F daca a fost tratat in timpul tinta"""
         wt = self.waiting_time
         if wt is None:
             return False

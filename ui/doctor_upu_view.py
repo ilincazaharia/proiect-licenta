@@ -9,7 +9,7 @@ from ui.doctor_utils import DoctorUtils
 class DoctorUPUView:
     @staticmethod
     def render(user_info: dict, patient_service: PatientService, referral_service: ReferralService):
-        """Randează interfața pentru medicul din UPU (Urgențe)."""
+        """Randează interfața pentru medicul din Urgențe."""
         if "reset_search_cnp" in st.session_state and st.session_state.reset_search_cnp:
             st.session_state.search_cnp_input = ""
             st.session_state.reset_search_cnp = False
@@ -68,11 +68,11 @@ class DoctorUPUView:
             st.subheader("Trimitere Pacient către Secție")
             
             with st.form("form_create_referral"):
-                # Nivel triaj
+
                 triage_options = ["Cod Roșu", "Cod Galben", "Cod Verde", "Cod Albastru", "Cod Alb"]
                 triage_level = st.selectbox("Nivel de triaj", triage_options)
                 
-                # Secție destinație (excludem Urgențe)
+                # Secție destinație
                 all_specialties = DoctorService.SPECIALTIES
                 sectii_options = [s for s in all_specialties if s != "Urgențe"]
                 specialty_dest = st.selectbox("Secție destinație", sectii_options)
@@ -98,8 +98,8 @@ class DoctorUPUView:
         # Istoric trimiteri efectuate
         DoctorUPUView.render_history_fragment(user_info, referral_service)
 
-    @st.fragment(run_every=5)
     @staticmethod
+    @st.fragment(run_every=5)
     def render_history_fragment(user_info: dict, referral_service: ReferralService):
         st.markdown("---")
         st.subheader("Istoric Trimiteri Efectuate")
@@ -108,10 +108,8 @@ class DoctorUPUView:
         if not referrals:
             st.info("Nu ați efectuat nicio trimitere până în prezent.")
         else:
-            # Building HTML table for a modern styled dashboard
             html_rows = ""
             for r in referrals:
-                # Triage colors
                 triage_colors = {
                     "Cod Roșu": ("#ef4444", "#ffffff"),
                     "Cod Galben": ("#f59e0b", "#ffffff"),

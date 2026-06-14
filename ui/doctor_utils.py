@@ -4,13 +4,12 @@ from services.patient_service import PatientService
 class DoctorUtils:
     @staticmethod
     def render_patient_history(patient_id: int, patient_service: PatientService):
-        """Randează istoricul medical (logurile) al unui pacient într-un mod prietenos."""
+        """Randează istoricul prin logurile unui pacient."""
         logs = patient_service.get_patient_logs(patient_id)
         if not logs:
             st.info("Nu există istoric medical înregistrat pentru acest pacient.")
             return
 
-        # Mapare tipuri evenimente la etichete mai prietenoase și culori
         event_meta = {
             "inregistrare": ("Înregistrare Sistem", "blue"),
             "trimis_sectie": ("Sosire UPU & Trimitere", "orange"),

@@ -10,7 +10,7 @@ class AuthService:
         self.user_repo = user_repository or UserRepository()
 
     def generate_salt(self) -> str:
-        """Generează un salt unic de 16 octeți (hex)."""
+        """Generează un salt unic"""
         return os.urandom(16).hex()
 
     def hash_password(self, password: str, salt: str) -> str:
@@ -63,10 +63,7 @@ class AuthService:
         return False, "Eroare internă la salvarea utilizatorului."
 
     def verify_user(self, email: str, password: str) -> Tuple[bool, Optional[User]]:
-        """
-        Verifică datele de autentificare.
-        Returnează (succes, obiect_User_sau_None).
-        """
+        """Verifică datele de autentificare."""
         email = email.lower().strip()
         pwd_info = self.user_repo.get_password_info_by_email(email)
         

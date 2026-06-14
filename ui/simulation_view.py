@@ -10,8 +10,8 @@ class SimulationView:
     @staticmethod
     def render(simulation_service: SimulationService, user_id: int, config_sidebar_data: dict):
         """Randează interfața principală a managerului pentru simulare, istoric și rezultate active."""
-        
-        # Mesaj de succes în caz de salvare recentă
+
+
         if "success_message" in st.session_state:
             st.success(st.session_state.success_message)
             del st.session_state.success_message

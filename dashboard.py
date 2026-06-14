@@ -12,26 +12,21 @@ from ui.manager_view import ManagerView
 from ui.doctor_upu_view import DoctorUPUView
 from ui.doctor_sectie_view import DoctorSectieView
 
-# Inițializare bază de date SQLite
 DBConnection.init_db()
 
-# Instanțiere servicii (Business Logic Layer)
 auth_service = AuthService()
 doctor_service = DoctorService()
 simulation_service = SimulationService()
 patient_service = PatientService()
 referral_service = ReferralService()
 
-# Setare pagină
 st.set_page_config(page_title="Simulare UPU", layout="wide")
 
-# Inițializare session state pentru autentificare
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
 
-# Auto-login pe bază de query params dacă sesiunea a fost reîmprospătată
 if not st.session_state.logged_in and "user_id" in st.query_params:
     try:
         user_id = int(st.query_params["user_id"])
@@ -50,7 +45,6 @@ if not st.session_state.logged_in and "user_id" in st.query_params:
     except Exception as e:
         pass
 
-# Inițializare session state pentru rezultate active
 if "current_results" not in st.session_state:
     st.session_state.current_results = None
 if "current_summary" not in st.session_state:
@@ -78,18 +72,16 @@ if "t_white" not in st.session_state: st.session_state.t_white = 10
 if "sim_duration" not in st.session_state: st.session_state.sim_duration = 480
 if "replications" not in st.session_state: st.session_state.replications = 30
 
-# Funcție Deconectare
+
 def logout():
     st.session_state.logged_in = False
     st.session_state.user_info = None
     st.query_params.clear()
     st.rerun()
 
-# --- BLOC AUTENTIFICARE ---
 if not st.session_state.logged_in:
     AuthView.render(auth_service)
 
-# --- BLOC APLICAȚIE AUTENTIFICATĂ ---
 user_role = st.session_state.user_info.get("role", "manager")
 
 if user_role == "manager":
@@ -107,7 +99,7 @@ if user_role == "manager":
     )
 
 else:
-    # --- PANOU CONTROL MEDIC ---
+
     st.sidebar.header("Utilizator conectat")
     st.sidebar.text(f"{st.session_state.user_info['first_name']} {st.session_state.user_info['last_name']}")
     st.sidebar.text(st.session_state.user_info['email'])

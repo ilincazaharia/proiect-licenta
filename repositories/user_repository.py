@@ -8,7 +8,6 @@ class UserRepository:
         pass
 
     def _row_to_user(self, row) -> User:
-        """Helper pentru conversia unui rând din baza de date în obiect User."""
         return User(
             id=row[0],
             last_name=row[1],

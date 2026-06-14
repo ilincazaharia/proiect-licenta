@@ -15,8 +15,6 @@ class ManagerView:
         tab_sim, tab_med = st.tabs(["Rulare & Rezultate active", "Administrare Medici"])
         
         with tab_sim:
-            # --- COD MIGRAT DIN SIMULATION_VIEW.PY ---
-            # Mesaj de succes în caz de salvare recentă
             if "success_message" in st.session_state:
                 st.success(st.session_state.success_message)
                 del st.session_state.success_message

@@ -30,18 +30,6 @@ class FIFOStrategy(QueueStrategy):
         # Toti au aceeasi prioritate (0), deci SimPy ii va servi in ordine FIFO
         return (0, patient.arrival_time)
 
-
-class StrictPriorityStrategy(QueueStrategy):
-    """
-    Prioritate stricta pe nivelul de triaj.
-    In cadrul aceluiasi nivel, ordine FIFO.
-    """
-    name = "Priority Strict"
-
-    def get_priority(self, patient: Patient, current_time: float) -> tuple:
-        return (patient.triage_level.value, patient.arrival_time)
-
-
 class PriorityFIFOStrategy(QueueStrategy):
     """
     Prioritate pe triaj cu FIFO in cadrul aceluiasi nivel.
@@ -56,6 +44,5 @@ class PriorityFIFOStrategy(QueueStrategy):
 # Lista tuturor strategiilor disponibile
 ALL_STRATEGIES = [
     FIFOStrategy(),
-    StrictPriorityStrategy(),
     PriorityFIFOStrategy()
 ]

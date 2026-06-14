@@ -12,7 +12,6 @@ class DoctorSectieView:
             st.error("Utilizatorul conectat nu este asociat unei secții de specialitate valide.")
             return
 
-        # CSS pentru colorarea butoanelor conform stărilor pacientului (verde pentru internare/acceptare, mov pentru externare)
         st.markdown(
             """
             <style>
@@ -83,8 +82,8 @@ class DoctorSectieView:
         st.markdown("---")
         DoctorSectieView.render_sectie_fragment(user_info, referral_service, patient_service, specialty)
 
-    @st.fragment(run_every=5)
     @staticmethod
+    @st.fragment(run_every=5)
     def render_sectie_fragment(user_info: dict, referral_service: ReferralService, patient_service: PatientService, specialty: str):
         st.subheader("Solicitări Noi de Internare")
         pending_referrals = referral_service.get_pending_referrals_for_specialty(specialty)

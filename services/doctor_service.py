@@ -4,7 +4,6 @@ from services.auth_service import AuthService
 from domain.models import User
 
 class DoctorService:
-    # Listă statică de specializări în limba română
     SPECIALTIES = [
         "Urgențe",
         "Cardiologie",

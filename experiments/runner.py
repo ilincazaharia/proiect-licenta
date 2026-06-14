@@ -23,7 +23,7 @@ def run_single_simulation(config: SimulationConfig, strategy: QueueStrategy, see
     metrics["seed"] = seed
     metrics["congestion_logs"] = department.congestion_logs
 
-    # Calcul grad de utilizare resurse pe perioada activă (după warmup)
+    # Calcul grad de utilizare resurse
     active_duration = config.simulation_duration - config.warmup_period
     if active_duration > 0:
         total_doc_busy = sum(p.treatment_duration for p in patients)
@@ -53,7 +53,7 @@ def run_experiment(config: SimulationConfig, strategy: QueueStrategy) -> list[di
 def run_all_experiments(config: SimulationConfig, strategies: list[QueueStrategy] = None) -> list[dict]:
     """
     Ruleaza experimentele pentru toate strategiile.
-    Returneaza o lista cu toate rezultatele (toate replicarile, toate strategiile).
+    Returneaza o lista cu rezultatele.
     """
     if strategies is None:
         strategies = ALL_STRATEGIES

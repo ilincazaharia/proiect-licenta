@@ -122,7 +122,7 @@ class PatientRepository:
             conn.close()
             if row:
                 return row[0]
-            return "externat"  # Status implicit dacă nu are loguri
+            return "externat"
         except Exception as e:
             print(f"Eroare în PatientRepository.get_current_status: {e}")
             return "externat"
